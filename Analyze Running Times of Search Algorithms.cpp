@@ -57,61 +57,54 @@ int sequentialSearch(const vector<int>& arr, int target) {
 int main() {
     //Variables for measuring time
     int N = 50000;
+    //Variables to accumulate times
     double SumRBS = 0, SumIBS = 0, SumSeqS = 0;
 
-    //Creating random number generator
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> dis(1, 100);
+    //Looping 10 times to measure time for each search method
+    for (int i = 0; i < 10; ++i) {
+        //Generating a vector of N random numbers in the range (1, 100)
+        vector<int> arr(N);
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(1, 100);
 
-    //Loop over different sizes of N
-    for (int size : {5000, 50000, 100000, 150000, 1000000}) {
-        SumRBS = 0;
-        SumIBS = 0;
-        SumSeqS = 0;
-
-        for (int i = 0; i < 10; ++i) {
-            //Generating a vector with N random numbers
-            vector<int> arr(size);
-            for (int j = 0; j < arr.size(); ++j) {
-                arr[j] = dis(gen);
-            }
-
-            //Sorting the vector
-            sort(arr.begin(), arr.end());
-
-            //Generating a random target value
-            int target = dis(gen);
-
-            //Measuring time for Recursive Binary Search
-            auto start = high_resolution_clock::now();
-            recursiveBinarySearch(arr, target, 0, arr.size() - 1);
-            auto end = high_resolution_clock::now();
-            duration<double> durationRBS = duration_cast<microseconds>(end - start);
-            SumRBS += durationRBS.count();
-
-            //Measuring time for Iterative Binary Search
-            start = high_resolution_clock::now();
-            iterativeBinarySearch(arr, target);
-            end = high_resolution_clock::now();
-            duration<double> durationIBS = duration_cast<microseconds>(end - start);
-            SumIBS += durationIBS.count();
-
-            //Measuring time for Sequential Search
-            start = high_resolution_clock::now();
-            sequentialSearch(arr, target);
-            end = high_resolution_clock::now();
-            duration<double> durationSeqS = duration_cast<microseconds>(end - start);
-            SumSeqS += durationSeqS.count();
+        for (int& num : arr) {
+            num = dis(gen);
         }
 
-        //Printing average running times for the size of N
-        cout << "For N = " << size << ":\n";
-        cout << "Average Running Time for Recursive Binary Search in microseconds: " << SumRBS / 10 << endl;
-        cout << "Average Running Time for Iterative Binary Search in microseconds: " << SumIBS / 10 << endl;
-        cout << "Average Running Time for Sequential Search in microseconds: " << SumSeqS / 10 << endl;
-        cout << "------------------------------" << endl;
+        //Sorting the vector
+        sort(arr.begin(), arr.end());
+
+        //Generating a random target value between 1 and 100
+        int target = dis(gen);
+
+        //Time Recursive Binary Search
+        auto start = high_resolution_clock::now();
+        recursiveBinarySearch(arr, target, 0, arr.size() - 1);
+        auto stop = high_resolution_clock::now();
+        duration<double> durationRBS = stop - start;
+        SumRBS += durationRBS.count() * 1000000;  // Convert to microseconds
+
+        //Time Iterative Binary Search
+        start = high_resolution_clock::now();
+        iterativeBinarySearch(arr, target);
+        stop = high_resolution_clock::now();
+        duration<double> durationIBS = stop - start;
+        SumIBS += durationIBS.count() * 1000000;  // Convert to microseconds
+
+        //Time Sequential Search
+        start = high_resolution_clock::now();
+        sequentialSearch(arr, target);
+        stop = high_resolution_clock::now();
+        duration<double> durationSeqS = stop - start;
+        SumSeqS += durationSeqS.count() * 1000000;  // Convert to microseconds
     }
+
+    //Printing the average times for each search method
+    cout << "Average Running Time for Recursive Binary Search in microseconds: " << SumRBS / 10 << endl;
+    cout << "Average Running Time for Iterative Binary Search in microseconds: " << SumIBS / 10 << endl;
+    cout << "Average Running Time for Sequential Search in microseconds: " << SumSeqS / 10 << endl;
+
 
     return 0;
 }
