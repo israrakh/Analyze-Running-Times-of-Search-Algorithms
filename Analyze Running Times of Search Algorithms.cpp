@@ -1,12 +1,14 @@
 // Analyze Running Times of Search Algorithms.cpp
-// Recursive and Iterative Binary seach, Sequential search algorithms, Random Numbers
+// Recursive and Iterative Binary seach, Sequential search algorithms, Random Numbers, Rate of Growth
 
 #include <iostream>
 #include <vector>
 #include <algorithm> //This is for sort
 #include <random> //For generating random numbers
+#include <chrono> //For timing the execution
 
 using namespace std;
+using namespace chrono;
 
 int recursiveBinarySearch(const vector<int>& arr, int target, int low, int high) {
     if (low <= high) {
@@ -53,62 +55,62 @@ int sequentialSearch(const vector<int>& arr, int target) {
 }
 
 int main() {
-    //Creatting a random number generator
+    //Variables for measuring time
+    int N = 50000;
+    double SumRBS = 0, SumIBS = 0, SumSeqS = 0;
+
+    //Creating random number generator
     random_device rd;
     mt19937 gen(rd());
-    uniform_int_distribution<> dis(1, 100); //Random numbers between 1 and 100
+    uniform_int_distribution<> dis(1, 100);
 
-    //Filling the vector with random numbers
-    vector<int> arr(10);  //Adjusting size as needed
-    for (int i = 0; i < arr.size(); ++i) {
-        arr[i] = dis(gen);
-    }
+    //Loop over different sizes of N
+    for (int size : {5000, 50000, 100000, 150000, 1000000}) {
+        SumRBS = 0;
+        SumIBS = 0;
+        SumSeqS = 0;
 
-    //Sorting the vector
-    sort(arr.begin(), arr.end());
+        for (int i = 0; i < 10; ++i) {
+            //Generating a vector with N random numbers
+            vector<int> arr(size);
+            for (int j = 0; j < arr.size(); ++j) {
+                arr[j] = dis(gen);
+            }
 
-    //Generate a random target value
-    int target = dis(gen); //Random target in the same range (1 to 100)
+            //Sorting the vector
+            sort(arr.begin(), arr.end());
 
-    //Printing the contents of the vector and the random target value
-    cout << "Contents of vector: ";
-    for (const int& num : arr) {
-        cout << num << " ";
-    }
-    cout << endl;
+            //Generating a random target value
+            int target = dis(gen);
 
-    cout << "Randomly generated target: " << target << endl;
+            //Measuring time for Recursive Binary Search
+            auto start = high_resolution_clock::now();
+            recursiveBinarySearch(arr, target, 0, arr.size() - 1);
+            auto end = high_resolution_clock::now();
+            duration<double> durationRBS = duration_cast<microseconds>(end - start);
+            SumRBS += durationRBS.count();
 
-    //Performming searches using the three search methods
+            //Measuring time for Iterative Binary Search
+            start = high_resolution_clock::now();
+            iterativeBinarySearch(arr, target);
+            end = high_resolution_clock::now();
+            duration<double> durationIBS = duration_cast<microseconds>(end - start);
+            SumIBS += durationIBS.count();
 
-    //Recursive Binary Search
-    int index = recursiveBinarySearch(arr, target, 0, arr.size() - 1);
-    cout << "Recursive Binary Search:" << endl;
-    if (index != -1) {
-        cout << "Target " << target << " found at index: " << index << endl;
-    }
-    else {
-        cout << "Target " << target << " was not found, return value is " << index << endl;
-    }
+            //Measuring time for Sequential Search
+            start = high_resolution_clock::now();
+            sequentialSearch(arr, target);
+            end = high_resolution_clock::now();
+            duration<double> durationSeqS = duration_cast<microseconds>(end - start);
+            SumSeqS += durationSeqS.count();
+        }
 
-    //Iterative Binary Search
-    index = iterativeBinarySearch(arr, target);
-    cout << "Iterative Binary Search:" << endl;
-    if (index != -1) {
-        cout << "Target " << target << " found at index: " << index << endl;
-    }
-    else {
-        cout << "Target " << target << " was not found, return value is " << index << endl;
-    }
-
-    //Sequential Search
-    index = sequentialSearch(arr, target);
-    cout << "Sequential Search:" << endl;
-    if (index != -1) {
-        cout << "Target " << target << " found at index: " << index << endl;
-    }
-    else {
-        cout << "Target " << target << " was not found, return value is " << index << endl;
+        //Printing average running times for the size of N
+        cout << "For N = " << size << ":\n";
+        cout << "Average Running Time for Recursive Binary Search in microseconds: " << SumRBS / 10 << endl;
+        cout << "Average Running Time for Iterative Binary Search in microseconds: " << SumIBS / 10 << endl;
+        cout << "Average Running Time for Sequential Search in microseconds: " << SumSeqS / 10 << endl;
+        cout << "------------------------------" << endl;
     }
 
     return 0;
