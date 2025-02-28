@@ -56,7 +56,7 @@ int sequentialSearch(const vector<int>& arr, int target) {
 
 int main() {
     //Variables for measuring time
-    int N = 50000;
+    int N = 100000;
     //Variables to accumulate times
     double SumRBS = 0, SumIBS = 0, SumSeqS = 0;
 
